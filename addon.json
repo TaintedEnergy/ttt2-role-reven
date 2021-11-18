@@ -1,0 +1,6 @@
+{
+	"title"		:	"[TTT2] Revenant [ROLE]",
+	"type"		:	"ServerContent",
+    "tags"		:	[ "roleplay", "fun" ],
+    "ignore"    : [".git/*", ".gitattributes"]
+}
