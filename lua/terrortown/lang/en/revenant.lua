@@ -15,3 +15,6 @@ L["ttt2_desc_" .. REVENANT.name] = [[The Revenant is an innocent role and works 
 -- OTHER ROLE LANGUAGE STRINGS
 
 L["ttt2_role_reven_revival_message"] = "You will be revived as a Revenant!"
+
+L["label_reven_revival_time"] = "How long it takes to revive"
+L["label_reven_damage_bonus"] = "Damage bonus"

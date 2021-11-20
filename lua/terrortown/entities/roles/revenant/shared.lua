@@ -104,3 +104,25 @@ if SERVER then
         end
 	end)
 end
+
+if CLIENT then
+	function ROLE:AddToSettingsMenu(parent)
+		local form = vgui.CreateTTT2Form(parent, "header_roles_additional")
+
+		form:MakeSlider({
+			serverConvar = "ttt2_reven_revival_time",
+			label = "label_reven_revival_time",
+			min = 0,
+			max = 100,
+			decimal = 0
+		})
+
+		form:MakeSlider({
+			serverConvar = "ttt2_reven_damage_bonus",
+			label = "label_reven_damage_bonus",
+			min = 0,
+			max = 5,
+			decimal = 1
+		})
+	end
+end
