@@ -48,14 +48,20 @@ end
 
 if SERVER then
 
+	function ROLE:GiveRoleLoadout(ply, isRoleChange)
+		if ply.revenant_state == nil or ply.revenant_state == 0 then
+			ply.revenant_state = 1
+		end
+	end
+
 	hook.Add("TTT2PostPlayerDeath", "RevenantDeath", function(ply, infl, attacker)
-		if ply:GetSubRole() ~= ROLE_REVENANT or ply:GetRealTeam() == TEAM_REVENANT then return end
+		if ply:GetSubRole() ~= ROLE_REVENANT or ply.revenant_state == 2 then return end
 		if SpecDM and (ply.IsGhost and ply:IsGhost() or (attacker.IsGhost and attacker:IsGhost())) then return end
-		
-		ply:UpdateTeam(TEAM_REVENANT)
 
 		ply:Revive(GetConVar("ttt2_reven_revival_time"):GetInt(),
 			function(p)
+				ply.revenant_state = 2
+				ply:UpdateTeam(TEAM_REVENANT)
 				p:ResetConfirmPlayer()
 				SendFullStateUpdate()
 			end,
@@ -68,7 +74,7 @@ if SERVER then
 
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleRevenMod", function(ply, tbl)
 		for rev in pairs(tbl) do
-			if rev:GetSubRole() == ROLE_REVENANT and rev:GetRealTeam() ~= TEAM_REVENANT then
+			if rev:GetSubRole() == ROLE_REVENANT and rev.revenant_state < 2 then
 				if ply == rev then
 					tbl[rev] = {ROLE_INNOCENT, TEAM_INNOCENT}
 				else
@@ -79,15 +85,15 @@ if SERVER then
 	end)
 
 	hook.Add("TTTCanSearchCorpse", "TTT2RevenChangeCorpseToInnocent", function(ply, corpse)
-		if IsValid(corpse) and corpse.was_role == ROLE_REVENANT and CORPSE.GetPlayer(corpse):GetRealTeam() ~= TEAM_REVENANT then
+		if IsValid(corpse) and corpse.was_role == ROLE_REVENANT and CORPSE.GetPlayer(corpse).revenant_state < 2 then
 			corpse.was_role = ROLE_INNOCENT
 			corpse.role_color = INNOCENT.color
-			corpse.is_reven_corpse = true
+			corpse.is_hidden_reven_corpse = true
 		end
 	end)
 
 	hook.Add("TTT2ConfirmPlayer", "TTT2RevenChangeRoleTeam", function(confirmed, finder, corpse)
-		if IsValid(confirmed) and corpse and corpse.is_reven_corpse then
+		if IsValid(confirmed) and corpse and corpse.is_hidden_reven_corpse then
 			confirmed:ConfirmPlayer(true)
 			SendRoleListMessage(ROLE_INNOCENT, TEAM_INNOCENT, {confirmed:EntIndex()})
 			events.Trigger(EVENT_BODYFOUND, finder, corpse)
@@ -98,11 +104,22 @@ if SERVER then
 
 	hook.Add("ScalePlayerDamage", "RevenantDamageScale", function(ply, hitgroup, dmginfo)
 		local attacker = dmginfo:GetAttacker()
-		if attacker:GetSubRole() == ROLE_REVENANT then
+		if attacker:GetSubRole() == ROLE_REVENANT and ply.revenant_state == 2 then
             local bonus = GetConVar("ttt2_reven_damage_bonus"):GetFloat()
             dmginfo:ScaleDamage(1 + bonus)
         end
 	end)
+
+	local function ResetRevenants() 
+		if not REVENANT then return end
+		for _, p in ipairs(player.GetAll()) do
+		  if IsValid(p) then p.revenant_state = 0 end
+		end
+	  end
+	
+	  hook.Add("TTTEndRound", "DuelistEndRound", ResetRevenants)
+	  hook.Add("TTTPrepareRound", "DuelistPrepareRound", ResetRevenants)
+	
 end
 
 if CLIENT then
