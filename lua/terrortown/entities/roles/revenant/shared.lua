@@ -164,7 +164,7 @@ if CLIENT then
 			decimal = 1
 		})
 
-		form:MakeCheckbox({
+		form:MakeCheckBox({
 			serverConvar = "ttt2_reven_worldspawn",
 			label = "label_reven_worldspawn",
 		})
