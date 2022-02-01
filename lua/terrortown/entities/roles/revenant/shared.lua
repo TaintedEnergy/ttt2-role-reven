@@ -68,7 +68,7 @@ if SERVER then
 				ply:ResetConfirmPlayer()
 				SendFullStateUpdate()
 				if ply.isRevenantWorldspawn or GetConVar('ttt2_reven_worldspawn'):GetBool() then
-					ply:SetPos(spawnpoint)
+					ply:SetPos(spawnpoint.pos)
 				end
 			end,
 			nil,
