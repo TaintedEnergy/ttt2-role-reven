@@ -69,6 +69,7 @@ if SERVER then
 				SendFullStateUpdate()
 				if ply.isRevenantWorldspawn or GetConVar('ttt2_reven_worldspawn'):GetBool() then
 					ply:SetPos(spawnpoint.pos)
+					ply:SetAngles(spawnpoint.ang)
 				end
 			end,
 			nil,
