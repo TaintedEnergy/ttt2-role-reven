@@ -1,5 +1,6 @@
 CreateConVar("ttt2_reven_revival_time", 15, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED})
 CreateConVar("ttt2_reven_damage_bonus", 0.5, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED})
+CreateConVar("ttt2_reven_worldspawn", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED})
 
 hook.Add("TTTUlxDynamicRCVars", "ttt2_ulx_dynamic_wrath_convars", function(tbl)
 	tbl[ROLE_REVENANT] = tbl[ROLE_REVENANT] or {}
