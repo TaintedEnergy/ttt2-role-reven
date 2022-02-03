@@ -51,6 +51,7 @@ if SERVER then
 	function ROLE:GiveRoleLoadout(ply, isRoleChange)
 		if ply.revenant_state == nil or ply.revenant_state == 0 then
 			ply.revenant_state = 1
+			ply.isRevenantWorldspawn = false
 		end
 	end
 
@@ -58,18 +59,28 @@ if SERVER then
 		if ply:GetSubRole() ~= ROLE_REVENANT or ply.revenant_state == 2 then return end
 		if SpecDM and (ply.IsGhost and ply:IsGhost() or (attacker.IsGhost and attacker:IsGhost())) then return end
 
+		local spawnpoint = plyspawn.GetRandomSafePlayerSpawnPoint(ply)
+
 		ply:Revive(GetConVar("ttt2_reven_revival_time"):GetInt(),
 			function(p)
 				ply.revenant_state = 2
 				ply:UpdateTeam(TEAM_REVENANT)
-				p:ResetConfirmPlayer()
+				ply:ResetConfirmPlayer()
 				SendFullStateUpdate()
+				if ply.isRevenantWorldspawn or GetConVar('ttt2_reven_worldspawn'):GetBool() then
+					ply:SetPos(spawnpoint.pos)
+					ply:SetAngles(spawnpoint.ang)
+				end
 			end,
 			nil,
 			false,
 			REVIVAL_BLOCK_ALL
 		)
-		ply:SendRevivalReason("ttt2_role_reven_revival_message")
+		if not GetConVar('ttt2_reven_worldspawn'):GetBool() then
+			ply:SendRevivalReason("ttt2_role_reven_revival_message_spawn_option")
+		else
+			ply:SendRevivalReason("ttt2_role_reven_revival_message")
+		end
 	end)
 
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleRevenMod", function(ply, tbl)
@@ -119,6 +130,17 @@ if SERVER then
 	
 	  hook.Add("TTTEndRound", "DuelistEndRound", ResetRevenants)
 	  hook.Add("TTTPrepareRound", "DuelistPrepareRound", ResetRevenants)
+
+	  hook.Add("KeyPress", "TTT2RevenantDoWorldSpawn", function (ply, key)
+		if ply:GetSubRole() ~= ROLE_REVENANT then return end
+		if not ply.isReviving then return end
+		if key ~= IN_RELOAD then return end
+		if ply.isRevenantWorldspawn or GetConVar("ttt2_reven_worldspawn"):GetBool() then return end
+
+		ply.isRevenantWorldspawn = true
+		ply:SendRevivalReason("ttt2_role_reven_revival_message")
+
+	  end)
 	
 end
 
@@ -140,6 +162,11 @@ if CLIENT then
 			min = 0,
 			max = 5,
 			decimal = 1
+		})
+
+		form:MakeCheckBox({
+			serverConvar = "ttt2_reven_worldspawn",
+			label = "label_reven_worldspawn",
 		})
 	end
 end
